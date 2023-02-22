@@ -4,7 +4,7 @@ from torch import distributions as dist
 from typing import Tuple
 import time
 
-torch.manual_seed(11)
+torch.manual_seed(4)
 
 
 def polynomial_fun(weight: torch.Tensor, x: torch.Tensor) -> torch.Tensor:

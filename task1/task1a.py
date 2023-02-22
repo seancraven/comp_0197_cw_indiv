@@ -19,8 +19,8 @@ def line_search(train_x, train_y, val_x, val_y):
     print("----------------------")
     print(f"Degree of best fit Polynomial: {best_degree}")
     print("Weights:\n", best_weight_dg.tolist())
-    print(f"Best Validation RMS(y_pred - y_true): {best_val:.2}")
-    print(f"Best Validation Error STD(y-pred - y_true): {best_std:.2}")
+    print(f"Best Model Validation RMS(y_pred - y_true): {best_val:.2}")
+    print(f"Best Model Validation STD(y-pred - y_true): {best_std:.2}")
 
 
 if __name__ == "__main__":
