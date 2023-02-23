@@ -22,7 +22,7 @@ def polynomial_fun(weight: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
 
 
 def fit_polynomial_ls(x_train, t_train, degree):
-    """Finds optimal weight vector for a train set using sq."""
+    """Fits weight vector of polynomial model from a train set using sq."""
     pows = torch.arange(0, degree + 1)
     phi = torch.pow(x_train[:, None] * torch.ones((x_train.shape[0], degree + 1)), pows)
     weight = torch.linalg.inv(phi.T @ phi) @ phi.T @ t_train
@@ -32,7 +32,7 @@ def fit_polynomial_ls(x_train, t_train, degree):
 def fit_polynomial_sgd(
     x_train, t_train, degree, lr=0.01, mini_batch_size=32, epochs=10000, verbose=True
 ):
-
+    """Fits a weight vector of polynomial model from train set using stochastic minibatch gradient descent"""
     batch_size = t_train.shape[0]
     weight = torch.ones((degree + 1,), requires_grad=True)
     opt = torch.optim.SGD([weight], lr=lr)
@@ -61,6 +61,8 @@ def fit_polynomial_sgd(
 def generate_set(
     num_points: int, std: float, weights: torch.Tensor
 ) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Generates random set of x scalars [-20, 20] with
+    y values y = \sum_i weight_i  x^i + noise"""
     x_dist = dist.Uniform(-20, 20)
     eps_dist = dist.Normal(0, std)
     x = x_dist.sample((num_points,))

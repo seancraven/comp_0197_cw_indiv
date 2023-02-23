@@ -2,6 +2,8 @@ import torch
 from task import *
 
 def line_search(train_x, train_y, val_x, val_y):
+    """Performs a line search over polynomials order to optimise validation error
+    on a polynomial model."""
     degrees = [i for i in range(15)]
     best_val = torch.inf
     print("Performing Line Search")
