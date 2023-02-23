@@ -1,3 +1,8 @@
+"""
+The script runs a comparison between leas squares and gradient descent fitting.
+
+It is clear that gradient descent is limited in its perfomance on hard to optimize targets.
+"""
 import torch
 from torch import nn
 from torch import distributions as dist
@@ -41,10 +46,7 @@ def fit_polynomial_sgd(
         for start in range(0, batch_size, mini_batch_size):
             end = start + mini_batch_size
             x_mb, t_mb = x_train[start:end], t_train[start:end]
-            # pred = torch.zeros_like(x_mb)
-            # for i in range(degree+1):
-            # pred += weight[i] * x_mb**i
-            # pred = pred.sum()
+
             pred = polynomial_fun(weight, x_mb)
             opt.zero_grad()
             loss = ((t_mb - pred) ** 2).mean()
@@ -60,24 +62,23 @@ def fit_polynomial_sgd(
 
 def generate_set(
     num_points: int, std: float, weights: torch.Tensor
-) -> Tuple[torch.Tensor, torch.Tensor]:
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Generates random set of x scalars [-20, 20] with
     y values y = \sum_i weight_i  x^i + noise"""
     x_dist = dist.Uniform(-20, 20)
     eps_dist = dist.Normal(0, std)
     x = x_dist.sample((num_points,))
-    f = polynomial_fun(weights, x)
+    f = polynomial_fun(weights, x) # Ground truth
     y = f + eps_dist.sample((num_points,))
 
-    return x, y
+    return x, y, f
 
 
 if __name__ == "__main__":
     gt_weights = torch.Tensor([1, 2, 3, 4, 5])
-    train_x, train_y = generate_set(100, 0.2, gt_weights)
-    # print("shapes", train_x.shape, train_y.shape)
-    # print("\n first few rows", train_x[:5], train_y[:5])
-    test_x, test_y = generate_set(50, 0.2, gt_weights)
+
+    train_x, train_y, train_f= generate_set(100, 0.2, gt_weights)
+    test_x, test_y, test_f = generate_set(50, 0.2, gt_weights)
 
     t0 = time.time_ns()
     weight_sgd = fit_polynomial_sgd(train_x, train_y, 5)
@@ -90,18 +91,28 @@ if __name__ == "__main__":
     print("----------------------------")
     pred_sgd = polynomial_fun(weight_sgd, test_x)
     pred_ls = polynomial_fun(weight_ls, test_x)
-
-    print("RMS(y_pred_ls - y_true):", (((pred_ls - test_y) ** 2).mean() ** 0.5).item())
-    print("STD(y_pred_ls - y_true)", (pred_ls - test_y).std().item())
+    # 1.1a
+    print("RMS(y_true_noisy - y_true)", (test_y - test_f).pow(2).mean().pow(0.5).item())
+    print("STD(y_true_noisy - y_true)", (test_y - test_f).std().item())
+    # 1.1b
+    print("\nRMS(y_pred_ls - y_true):", (((pred_ls - test_f) ** 2).mean() ** 0.5).item())
+    print("STD(y_pred_ls - y_true)", (pred_ls - test_f).std().item())
+    # 1.2a
     print(
-        "\nRMS(y_pred_sgd - y_true):", (((pred_sgd - test_y) ** 2).mean() ** 0.5).item()
+        "\nRMS(y_pred_sgd - y_true):", (((pred_sgd - test_f) ** 2).mean() ** 0.5).item()
     )
-    print("STD(y_pred_sgd - y_true):", (pred_sgd - test_y).std().item())
+    print("STD(y_pred_sgd - y_true):", (pred_sgd - test_f).std().item())
+    # 1.4a
     print(
         "\nRMS(y_pred_ls - y_pred_sgd):",
         (((pred_sgd - pred_ls) ** 2).mean() ** 0.5).item(),
     )
     print("STD(y_pred_ls - y_pred_sgd):", (pred_sgd - pred_ls).std().item())
-    print("\n Runtime Info")
+    # 1.5a
+    print("\nRMS(w_sgd - w_ls)", (weight_sgd-weight_ls).pow(2).mean().pow(0.5).item())
+    print("STD(w_sgd - w_ls)", (weight_sgd - weight_ls).std().item())
+
+
+    print("\nRuntime Info")
     print(f"SGD fit time:{float(t_sgd):.2} ns")
     print(f"Least Squares fit time: {float(t_ls):.2} ns")

@@ -1,28 +1,33 @@
+"""
+Note:
+
+0) Training accuracy is a running average over the epoch.
+This means that the model changes while the average is taken
+and it is a biased estimate.
+
+1) The training data has the MixUp transform applied. In
+contrast, the validation set does not.
+
+Both factors lead to the training loss and the
+validation loss not being comparable when printed.
+
+The Validation losses are similar to the test losses.
+This is encouraging and suggests they are a reasonable proxy for
+test accuracy.
+"""
 import torch
 import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
 from torch import nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torchvision.models.resnet import resnet50
 from torch.utils.data.dataset import random_split
 from task2.task import MixUp
 from time import time
 from typing import Tuple
 
-"""
-Note:
 
-1) Training accuracy is a running average over the epoch.
-This means that the model changes while the average is taken 
-and it is a biased estimate. 
-
-2) The training data has the MixUp transform applied. In 
-contrast the validation set does not.
-
-Both of these factors lead to the training loss and the 
-validation loss not being comparable when printed.
-"""
 def opt_ablation(opt: optim.Optimizer, net: nn.Module)-> Tuple[float, float]:
     """Trains Network with a specific optimizer.
 
@@ -84,8 +89,9 @@ def opt_ablation(opt: optim.Optimizer, net: nn.Module)-> Tuple[float, float]:
 
 
 if __name__ == "__main__":
-    print("Ablation Study on differing Optimizers.")
-    print("Training Data augmented with MixUp lam ~ beta(0.2, 0.2)")
+    print("Ablation study on differing optimizers.")
+    print("Training sata augmented with MixUp lam ~ beta(0.2, 0.2)")
+
     device = ("cuda" if torch.cuda.is_available() else "cpu")
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
@@ -176,14 +182,14 @@ if __name__ == "__main__":
             sgd_loss = loss(sgd_pred, test_lab).item()
 
     print("Adam:")
-    print(f"Traing Time: {t1_adam-t0_adam:.2f}s")
+    print(f"Training Time: {t1_adam-t0_adam:.2f}s")
     print(f"Test Accuracy: {adam_acc*100:.2f}%")
     print(f"Test Loss: {adam_loss:.2f}")
     print(f"Validation Accuracy: {adam_val_acc*100:.2f}%")
     print(f"Validation Loss: {adam_val_loss:.2f}")
     print("--------------------------------")
     print("SGD:")
-    print(f"Traing Time: {t1_sgd-t0_sgd:.2f}s")
+    print(f"Training Time: {t1_sgd-t0_sgd:.2f}s")
     print(f"Test Accuracy: {sgd_acc*100:.2f}%")
     print(f"Test Loss: {sgd_loss:.2f}")
     print(f"Validation Accuracy: {sgd_val_acc*100:.2f}%")

@@ -1,3 +1,13 @@
+"""
+The mixup transform is applied in a class MixUp.
+The sampling method for mix up can either use uniform of beta distributions.
+And can be changed from the command line using either --sampling_method or -sm.
+
+There is a greyed out plotting script used to produce the results.png.
+"""
+
+
+
 import argparse
 import torch
 import torchvision
@@ -23,6 +33,8 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+
+
 # mixup
 class MixUp(Dataset):
     """Implements mixup algorithm on a dataset."""
